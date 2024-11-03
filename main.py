@@ -3,10 +3,29 @@ import numpy as np
 import random
 import colorsys
 
+def write_closed_contours_to_svg(svg_filename, contours):
+    with open(svg_filename, 'w') as f:
+        f.write('<svg xmlns="http://www.w3.org/2000/svg">\n')
+        for contour in contours:
+            #print(c[i][0])
+            f.write('<path stroke="red" d="')
+            last_item = len(contour) - 1
+            for ix, point in enumerate(contour):
+                if ix == 0:
+                    f.write(' M' + str(point[0][0])+  ' ' + str(point[0][1])+' ')
+                elif ix >= 0 and ix < last_item:
+                    f.write(' L' + str(point[0][0])+  ' ' + str(point[0][1])+' ')
+                elif ix > 0 and ix == last_item:
+                    f.write(' L' + str(point[0][0])+  ' ' + str(point[0][1])+' Z')
+            f.write('"/>\n')
+        f.write('</svg>')
+
 #hyperparameters to tune
 erosion_dilation_kernel = 3
 simplification_kernel = 4
 min_allowed_contour_area = 3
+
+scale_factor = 1
 
 im_gray = cv2.imread('celeron_detail.png', cv2.IMREAD_GRAYSCALE)
 (threshold, im_bw) = cv2.threshold(im_gray, 128, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
@@ -53,6 +72,8 @@ for contour in simplified_large_contours:
 
 cv2.imwrite('color_pic.png', color_pic)
 
+write_closed_contours_to_svg('svg_file.svg', simplified_large_contours)
+
 # Display the image with contours
 cv2.imshow('Contours', color_pic)
 cv2.waitKey(0)
@@ -60,3 +81,4 @@ cv2.destroyAllWindows()
 
 print('Threshold: '+str(threshold))
 
+print('Done!')

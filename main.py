@@ -24,6 +24,16 @@ def write_closed_contours_to_svg(svg_filename, contours):
             f.write('"/>\n')
         f.write('</svg>')
 
+def draw_contours_on_input_image(img_orig, contours, output_filename):
+    # Draw the contours on the original image
+    color_pic = cv2.cvtColor(img_orig, cv2.COLOR_GRAY2RGB)
+    for contour in contours:
+        #get a random brightly saturated color
+        h,s,l = random.random(), 0.5 + random.random()/2.0, 0.4 + random.random()/5.0
+        r,g,b = [int(256*i) for i in colorsys.hls_to_rgb(h,l,s)]
+        cv2.drawContours(color_pic, [contour], -1, (r,g,b), 1)
+    cv2.imwrite(output_filename, color_pic)
+
 #hyperparameters to tune
 erosion_dilation_kernel = 3
 simplification_kernel = 4
@@ -66,22 +76,8 @@ for contour in simplified_contours:
         simplified_large_contours.append(contour)
 x = 2
 
-# Draw the contours on the original image
-color_pic = cv2.cvtColor(im_gray, cv2.COLOR_GRAY2RGB)
-for contour in simplified_large_contours:
-    #get a random brightly saturated color
-    h,s,l = random.random(), 0.5 + random.random()/2.0, 0.4 + random.random()/5.0
-    r,g,b = [int(256*i) for i in colorsys.hls_to_rgb(h,l,s)]
-    cv2.drawContours(color_pic, [contour], -1, (r,g,b), 1)
-
-cv2.imwrite('color_pic.png', color_pic)
-
+draw_contours_on_input_image(im_gray, simplified_large_contours, 'color_pic.png')
 write_closed_contours_to_svg('svg_file.svg', simplified_large_contours)
-
-# Display the image with contours
-cv2.imshow('Contours', color_pic)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
 
 print('Threshold: '+str(threshold))
 

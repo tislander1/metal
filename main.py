@@ -12,7 +12,7 @@ def write_closed_contours_to_svg(svg_filename, contours):
         f.write('<svg xmlns="http://www.w3.org/2000/svg">\n')
         for contour in contours:
             #print(c[i][0])
-            f.write('<path stroke="red" d="')
+            f.write('<path stroke="black" d="')
             last_item = len(contour) - 1
             for ix, point in enumerate(contour):
                 if ix == 0:

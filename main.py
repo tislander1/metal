@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import random
 import colorsys
+import gdstk
 
 Version = 0.1
 
@@ -23,6 +24,29 @@ def write_closed_contours_to_svg(svg_filename, contours):
                     f.write(' L' + str(point[0][0])+  ' ' + str(point[0][1])+' Z')
             f.write('"/>\n')
         f.write('</svg>')
+    print('Wrote contours to SVG file '+ str(svg_filename) + '.')
+
+def write_closed_contours_to_gds(filename, contours, file_output_type_list = ['gds']):
+    #file output types: 'oasis'
+    lib = gdstk.Library()
+    cell = lib.new_cell("Top_cell")
+    for contour in contours:
+        poly_points = []
+        for pt in contour:
+            poly_points.append( (int(pt[0][0]), int(pt[0][1])))
+        poly = gdstk.Polygon(poly_points)
+        cell.add(poly)
+    for file_output_type in file_output_type_list:
+        if file_output_type == 'gds':
+            lib.write_gds(filename + '.gds')
+            print('Wrote GDSII file to ' + filename + '.gds')
+        elif file_output_type == 'oas':
+            lib.write_oas(filename + '.oas')
+            print('Wrote OASIS file to ' + filename + '.oas')
+        elif file_output_type == 'svg':
+            cell.write_svg(filename + '.svg')
+            print('Wrote SVG file to ' + filename + '.svg')
+    x = 2
 
 def draw_contours_on_input_image(img_orig, contours, output_filename):
     # Draw the contours on the original image
@@ -33,6 +57,7 @@ def draw_contours_on_input_image(img_orig, contours, output_filename):
         r,g,b = [int(256*i) for i in colorsys.hls_to_rgb(h,l,s)]
         cv2.drawContours(color_pic, [contour], -1, (r,g,b), 1)
     cv2.imwrite(output_filename, color_pic)
+    print('Added contours to input image')
 
 #hyperparameters to tune
 erosion_dilation_kernel = 3
@@ -43,6 +68,7 @@ scale_factor = 1
 
 im_gray = cv2.imread('celeron_detail.png', cv2.IMREAD_GRAYSCALE)
 (threshold, im_bw) = cv2.threshold(im_gray, 128, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+print('Threshold: '+str(threshold))
 
 kernel = np.ones((erosion_dilation_kernel, erosion_dilation_kernel), np.uint8) 
 im_bw_eroded = cv2.erode(im_bw, kernel)
@@ -78,7 +104,8 @@ x = 2
 
 draw_contours_on_input_image(im_gray, simplified_large_contours, 'color_pic.png')
 write_closed_contours_to_svg('svg_file.svg', simplified_large_contours)
+write_closed_contours_to_gds('gds_file', simplified_large_contours, ['gds', 'oas', 'svg'])
 
-print('Threshold: '+str(threshold))
+
 
 print('Done!')

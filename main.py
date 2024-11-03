@@ -3,8 +3,12 @@ import numpy as np
 import random
 import colorsys
 
+Version = 0.1
+
 def write_closed_contours_to_svg(svg_filename, contours):
     with open(svg_filename, 'w') as f:
+        f.write('<!-- SVG output written by Metal utility ver. 0.1 (https://github.com/tislander1/metal) -->\n')
+        f.write
         f.write('<svg xmlns="http://www.w3.org/2000/svg">\n')
         for contour in contours:
             #print(c[i][0])
